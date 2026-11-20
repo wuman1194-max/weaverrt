@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WeaverRT — Agent Control Plane &amp; Observability</title>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--line:#30363d;--ink:#e6edf3;--muted:#8b949e;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--accent:#58a6ff;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card);display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:17px}
+main{max-width:1200px;margin:0 auto;padding:16px;display:grid;gap:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:880px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto}
+h2{margin:0 0 10px;font-size:14px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--muted);font-weight:600}
+.pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600}
+.ok{background:rgba(63,185,80,.18);color:var(--ok)}
+.bad{background:rgba(248,81,73,.18);color:var(--bad)}
+.warn{background:rgba(210,153,34,.18);color:var(--warn)}
+button{background:var(--accent);color:#0d1117;border:0;border-radius:6px;padding:4px 10px;font-weight:600;cursor:pointer;margin-right:4px}
+button.danger{background:var(--bad);color:#fff}
+pre{background:#0b0f14;padding:10px;border-radius:8px;max-height:260px;overflow:auto;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>WeaverRT · AgentSphere Control Plane &amp; Trace Console</h1>
+  <span id="ts" style="color:var(--muted)">Loading...</span>
+</header>
+<main>
+  <div class="grid2">
+    <section class="card">
+      <h2>Agent Artifacts &amp; Release Gates</h2>
+      <table><thead><tr><th>Artifact</th><th>Owner</th><th>Arch</th><th>Gate</th><th>Status</th><th>Action</th></tr></thead><tbody id="arts"></tbody></table>
+    </section>
+    <section class="card">
+      <h2>Human-in-the-Loop Approvals</h2>
+      <table><thead><tr><th>ID</th><th>Session</th><th>Tool</th><th>Status</th><th>Decision</th></tr></thead><tbody id="apprs"></tbody></table>
+    </section>
+  </div>
+  <section class="card">
+    <h2>Evaluation Experiments &amp; Regression Gate</h2>
+    <table><thead><tr><th>Run ID</th><th>Artifact</th><th>Pass Rate</th><th>Avg Tokens</th><th>P95 (ms)</th><th>Sec Violations</th><th>Gate</th></tr></thead><tbody id="evals"></tbody></table>
+  </section>
+  <div class="grid2">
+    <section class="card">
+      <h2>Runtime Sessions (Click to Inspect Trace)</h2>
+      <table><thead><tr><th>Session</th><th>Status</th><th>Turns</th><th>Tokens</th><th>Worker</th></tr></thead><tbody id="sess"></tbody></table>
+    </section>
+    <section class="card">
+      <h2>Bad Case Feedback Queue</h2>
+      <table><thead><tr><th>Case</th><th>Artifact</th><th>Root Cause</th><th>Feedback</th></tr></thead><tbody id="bads"></tbody></table>
+    </section>
+  </div>
+  <section class="card">
+    <h2>Selected Session Trace Waterfall</h2>
+    <pre id="trace">Click any session row above to inspect its Trace Span tree.</pre>
+  </section>
+</main>
+<script>
+async function get(u){ return (await fetch(u)).json(); }
+async function post(u,b){ return (await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)})).json(); }
+function pill(txt, cls){ return `<span class="pill ${cls}">${txt}</span>`; }
+async function releaseArt(n,v){ const r=await post('/api/artifacts/release',{name:n,version:v}); alert(r.message); refresh(); }
+async function resolveAppr(id,ok){ await post(`/api/approvals/${id}/resolve`,{approved:ok}); refresh(); }
+async function showTrace(sid){
+  const d = await get(`/api/sessions/${sid}/traces`);
+  document.getElementById('trace').textContent = JSON.stringify(d.traces, null, 2);
+}
+async function refresh(){
+  const [a,p,e,s,b] = await Promise.all([get('/api/artifacts'),get('/api/approvals'),get('/api/evals'),get('/api/sessions'),get('/api/bad_cases')]);
+  document.getElementById('ts').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  document.getElementById('arts').innerHTML = a.artifacts.map(x=>`<tr>
+    <td><b>${x.artifact_id}</b></td><td>${x.owner}</td><td>${x.architecture}</td>
+    <td>${x.last_gate_passed?pill('PASS','ok'):pill('UNVERIFIED','warn')}</td>
+    <td>${pill(x.status, x.status==='RELEASED'?'ok':(x.status==='GATED'?'warn':'bad'))}</td>
+    <td><button onclick="releaseArt('${x.name}','${x.version}')">Release</button></td></tr>`).join('');
+  document.getElementById('apprs').innerHTML = p.approvals.map(x=>`<tr>
+    <td>${x.approval_id}</td><td>${x.session_id}</td><td>${x.tool_name}</td><td>${x.status}</td>
+    <td>${x.status==='PENDING'?`<button onclick="resolveAppr('${x.approval_id}',true)">Approve</button><button class="danger" onclick="resolveAppr('${x.approval_id}',false)">Reject</button>`:x.decided_by}</td></tr>`).join('');
+  document.getElementById('evals').innerHTML = e.eval_runs.map(x=>`<tr>
+    <td>${x.run_id}</td><td>${x.artifact_id}</td><td><b>${(x.pass_rate*100).toFixed(1)}%</b> (${x.passed_cases}/${x.total_cases})</td>
+    <td>${Math.round(x.avg_tokens)}</td><td>${x.p95_ms}</td><td>${x.security_violations}</td>
+    <td>${x.gate_passed?pill('GATE PASSED','ok'):pill('GATE BLOCKED','bad')}</td></tr>`).join('');
+  document.getElementById('sess').innerHTML = s.sessions.map(x=>`<tr style="cursor:pointer" onclick="showTrace('${x.session_id}')">
+    <td>${x.session_id}</td><td>${pill(x.status, x.status==='COMPLETED'?'ok':(x.status==='RUNNING'?'warn':'bad'))}</td>
+    <td>${x.current_turn}</td><td>${x.tokens_used}</td><td>${x.worker_id||'-'}</td></tr>`).join('');
+  document.getElementById('bads').innerHTML = b.bad_cases.map(x=>`<tr>
+    <td>${x.case_id}</td><td>${x.artifact_id}</td><td>${pill(x.root_cause,'bad')}</td><td>${x.feedback.slice(0,90)}</td></tr>`).join('');
+}
+refresh(); setInterval(refresh, 3000);
+</script>
+</body>
+</html>

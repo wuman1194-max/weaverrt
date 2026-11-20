@@ -1,0 +1,10 @@
+[project]
+name = "weaverrt"
+version = "0.1.0"
+description = "WeaverRT — Lightweight Production AI Agent Infrastructure (Harness Kernel, Managed Runtime, Context & Memory, MCP & Linux Sandbox, Control Plane, Evaluation & Evolution)"
+requires-python = ">=3.11"
+dependencies = []
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

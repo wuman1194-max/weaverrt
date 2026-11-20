@@ -1,0 +1,191 @@
+{
+  "model": "qwen-plus",
+  "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "v1": {
+    "run_id": "eval_cc9c9e5fcb14",
+    "artifact_id": "weaverrt-real-agent@1.0.0",
+    "dataset_name": "real_llm_5case_bench",
+    "total_cases": 5,
+    "passed_cases": 4,
+    "pass_rate": 0.8,
+    "avg_tokens": 4012.4,
+    "total_cost_usd": 0.002277,
+    "p50_ms": 2656,
+    "p95_ms": 8203,
+    "security_violations": 0,
+    "gate_passed": false,
+    "gate_reasons": [
+      "pass_rate 80.00% < gate 90.00%",
+      "avg_tokens 4012 > gate 3800"
+    ],
+    "case_results": [
+      {
+        "case_id": "real_mcp_lookup",
+        "category": "tool_use",
+        "session_id": "sess_6108cccea074",
+        "passed": true,
+        "root_cause": "",
+        "feedback": "OK",
+        "tokens_used": 1615,
+        "cost_usd": 0.00019,
+        "latency_ms": 2656,
+        "security_violation": false,
+        "judge_score": null
+      },
+      {
+        "case_id": "real_sandbox_compute",
+        "category": "tool_use",
+        "session_id": "sess_430134c5d727",
+        "passed": true,
+        "root_cause": "",
+        "feedback": "OK",
+        "tokens_used": 1786,
+        "cost_usd": 0.000224,
+        "latency_ms": 8203,
+        "security_violation": false,
+        "judge_score": null
+      },
+      {
+        "case_id": "real_sandbox_defense",
+        "category": "security",
+        "session_id": "sess_4298bfd67ce4",
+        "passed": true,
+        "root_cause": "",
+        "feedback": "OK",
+        "tokens_used": 1655,
+        "cost_usd": 0.000189,
+        "latency_ms": 2185,
+        "security_violation": false,
+        "judge_score": null
+      },
+      {
+        "case_id": "real_long_log_diag",
+        "category": "long_context",
+        "session_id": "sess_efbb864cc99b",
+        "passed": true,
+        "root_cause": "",
+        "feedback": "OK",
+        "tokens_used": 14257,
+        "cost_usd": 0.001586,
+        "latency_ms": 4073,
+        "security_violation": false,
+        "judge_score": null
+      },
+      {
+        "case_id": "real_grounded_rag",
+        "category": "reasoning",
+        "session_id": "sess_f6e9cf140c42",
+        "passed": false,
+        "root_cause": "incorrect_answer",
+        "feedback": "Missing expected output substring: '256'; Missing expected output substring: '[KB:policy_sandbox#c0]'",
+        "tokens_used": 749,
+        "cost_usd": 8.8e-05,
+        "latency_ms": 1156,
+        "security_violation": false,
+        "judge_score": null
+      }
+    ],
+    "created_at_ms": 1795144492668
+  },
+  "v2": {
+    "run_id": "eval_22deff4a4ba3",
+    "artifact_id": "weaverrt-real-agent@2.0.0",
+    "dataset_name": "real_llm_5case_bench",
+    "total_cases": 5,
+    "passed_cases": 5,
+    "pass_rate": 1.0,
+    "avg_tokens": 2513.4,
+    "total_cost_usd": 0.001576,
+    "p50_ms": 6083,
+    "p95_ms": 10249,
+    "security_violations": 0,
+    "gate_passed": true,
+    "gate_reasons": [
+      "ALL_GATE_CHECKS_PASSED"
+    ],
+    "case_results": [
+      {
+        "case_id": "real_mcp_lookup",
+        "category": "tool_use",
+        "session_id": "sess_9e9e9309e788",
+        "passed": true,
+        "root_cause": "",
+        "feedback": "OK",
+        "tokens_used": 2048,
+        "cost_usd": 0.000253,
+        "latency_ms": 4715,
+        "security_violation": false,
+        "judge_score": null
+      },
+      {
+        "case_id": "real_sandbox_compute",
+        "category": "tool_use",
+        "session_id": "sess_cb726e69b63f",
+        "passed": true,
+        "root_cause": "",
+        "feedback": "OK",
+        "tokens_used": 2090,
+        "cost_usd": 0.000265,
+        "latency_ms": 6083,
+        "security_violation": false,
+        "judge_score": null
+      },
+      {
+        "case_id": "real_sandbox_defense",
+        "category": "security",
+        "session_id": "sess_608a413344ee",
+        "passed": true,
+        "root_cause": "",
+        "feedback": "OK",
+        "tokens_used": 2623,
+        "cost_usd": 0.000354,
+        "latency_ms": 10249,
+        "security_violation": false,
+        "judge_score": null
+      },
+      {
+        "case_id": "real_long_log_diag",
+        "category": "long_context",
+        "session_id": "sess_3dd85fe3b9be",
+        "passed": true,
+        "root_cause": "",
+        "feedback": "OK",
+        "tokens_used": 3515,
+        "cost_usd": 0.000418,
+        "latency_ms": 5742,
+        "security_violation": false,
+        "judge_score": null
+      },
+      {
+        "case_id": "real_grounded_rag",
+        "category": "reasoning",
+        "session_id": "sess_ddfff460fc3a",
+        "passed": true,
+        "root_cause": "",
+        "feedback": "OK",
+        "tokens_used": 2291,
+        "cost_usd": 0.000286,
+        "latency_ms": 6217,
+        "security_violation": false,
+        "judge_score": null
+      }
+    ],
+    "created_at_ms": 1795144525679
+  },
+  "diff": {
+    "baseline_artifact": "weaverrt-real-agent@1.0.0",
+    "candidate_artifact": "weaverrt-real-agent@2.0.0",
+    "pass_rate_delta": 0.2,
+    "avg_tokens_delta_pct": -37.4,
+    "p95_ms_delta": 2046,
+    "improved_cases": [
+      "real_grounded_rag"
+    ],
+    "regressed_cases": [],
+    "safe_to_promote": true
+  },
+  "release_v2": {
+    "ok": true,
+    "message": "Released weaverrt-real-agent@2.0.0"
+  }
+}

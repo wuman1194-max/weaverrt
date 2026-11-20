@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.env
+.demo_data/
+.real_llm_data/
+.real_jd_suite/
+*.db
+*.db-wal
+*.db-shm
+*.egg-info/
+dist/
+build/
